@@ -1,0 +1,25 @@
+WARNING DANGER CLOSE : Read the file in full before attempting setup.  If you do not know what you are doing then please do not use this script.
+
+-->* 1. Insert Bootable Linux OS Media compatible with CentOS.  For development and testing CentOS i386 minimal was used.
+
+-->* 2.At boot prompt press <TAB> key and append ks=http://dime-machine.com/dime-machine.txt
+
+Make sure there is a space between the last character of the line and when you start typing ks=
+
+WARNING: THIS WILL WIPE ANY DISK THAT THE INSTALLER CAN SEE. 
+
+In a VM you will be fine but caution is given if you are using a physical machine.  Do not test on your workstation, laptop, server etc - there will be no chance to pause, stop or go back once you hit enter at the bootloader prompt.
+
+IT WILL BE TOO LATE IF YOU HIT RETURN  <<<<------- DANGER DANGER DANGER !!! :-(
+
+NO WARRANTY IMPLIED OR GIVEN.  I WILL NOT BE HELD RESPONSIBLE FOR ANYTHING THAT HAPPENS THROUGH (MIS)USE OF THIS SCRIPT.
+
+-->* 3. You will have to remove the CD after the initial reboot once your OS has installed.  At that point a single run script will run to update packages, download code, compile, install and configure. 
+
+On a XEON 3.5GHz with 50mbps WAN connection this took around 20 minutes.  This assumes you have a direct connection to the internet or a proxy external to the attached network where this script is running.
+
+Any queries, comments, complaints, cash, gadgets or movie stars then please refer to:
+     https://github.com/tsew/dime-machine
+     http://dimemachine.com
+
+All Rights Reserved, 2012, 2013, TSEW Ltd., U.K.

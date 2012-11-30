@@ -1,0 +1,150 @@
+# Kickstart file to automatically do everything that is needed to install DimeMachine
+#
+# WARNING: THIS WILL TRASH ANY EXISTING DISK THAT IS CONNECTED TO THE MACHINE WHERE THIS SCRIPT RUNS
+#
+# I PROVIDE NO LIABILITY OR RESPONSIBILITY.  USE OF THIS SCRIPT ACCEPTS THAT THERE IS NO SUPPORT.
+#
+# DimeMachine is a set of packages that allows you to use the deployed system to do Mac Backups
+#
+# The backup target will be within the root file system and use all available disk space
+#
+# This kickstart is divided into a number of sections:
+#  1) The basic disk layout, package select and network configuration (dhcp) then reboot (remove CD)
+#  2) The creation of 3 scripts that are run on first boot;
+#     i)   Setup Yum, ntp and download a whole host of packages and compile
+#     ii)  Create a configuration file for netatalk and copy it in place
+#     iii) Create the afpd service in avahi
+#  3) Reboot to get everything working - runonce script is disabled but can still be run if you want :-(
+#
+#
+# Any queries, comments, complaints, cash, gadgets or movie stars 
+# then please refer to:
+#     https://github.com/tsew/dime-machine
+#     http://dimemachine.com
+#
+#All Rights Reserved, 2012,2013, TSEW Ltd, U.K
+#
+
+install
+cdrom
+lang en_US.UTF-8
+keyboard uk
+network --device eth0 --bootproto dhcp --hostname DimeMachine
+rootpw dimemachine 
+firewall --disabled
+authconfig --enableshadow --passalgo=sha512
+selinux --disabled
+timezone --utc Europe/London
+bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet"
+reboot
+
+# The following is the partition information that will be created
+# Note the use of zerombr which will render all drives unuseable
+# I suggest you pull all drives other than the target unless you know what you are doing
+# You should be fine within a VM but remember it will wipe all connected VM Disks
+#
+# Creates 3 volumes, up to 10GB root, 1GB Swap and rest of disk space up to 16TB for /backup
+#
+# YOU WILL NEED A 16GB DISK AT LEAST
+#
+zerombr yes
+clearpart --all --drives=sda --initlabel
+part /boot --fstype=ext4 --size=500
+part pv.008002 --grow --size=1
+volgroup VolGroup --pesize=16384 pv.008002
+logvol / --fstype=ext4 --name=lv_root --vgname=VolGroup --grow --size=1024 --maxsize=10240
+logvol /backup --fstype=ext4 --name=lv_backup --vgname=VolGroup --grow --size=1024 --maxsize=16777216
+logvol swap --name=lv_swap --vgname=VolGroup --grow --size=1024 --maxsize=1024
+
+#repo --name="CentOS"  --baseurl=cdrom:sr0 --cost=100
+
+%packages --nobase
+@core
+
+%post
+/bin/sed -i 's/rhgb quiet//g' /boot/grub/grub.conf
+
+/bin/cat > /etc/afp.tm << EOF
+;
+; Netatalk 3.x configuration file
+;
+
+[Global]
+; Global server settings
+hostname = Dime Machine
+zeroconf = yes
+uam list = uams_guest.so,uams_dhx.so,uams_dhx2.so
+
+[Backup]
+time machine = yes
+path = /backup
+directory perm = 0774
+file perm = 0664
+EOF
+
+/bin/cat > /etc/avahi.tm << EOF
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+	<name replace-wildcards="yes">%h</name>
+	<service>
+		<type>_afpovertcp._tcp</type>
+		<port>548</port>
+	</service>
+	<service>
+		<type>_device-info._tcp</type>
+		<port>0</port>
+		<txt-record>model=Xserve</txt-record>
+	</service>
+</service-group>
+EOF
+
+/bin/cat > /etc/init.d/runonce << EOF
+#!/bin/bash
+#
+# runonce : a script that runs once after installation
+#           used to setup yum and some packages for timemachine
+#
+# chkconfig: 2345 99 20
+# description: a scipt that will run once to configure time machine
+
+case "\$1" in
+	start)
+		echo "START OF INSTALL" > /root/dimemachine.log
+		/usr/bin/yum -y install ntp >> /root/dimemachine.log
+		/sbin/chkconfig ntpd on >> /root/dimemachine.log
+		/sbin/chkconfig ntpdate on >> /root/dimemachine.log
+		echo "exclude=kernel*" >> /etc/yum.conf
+		/usr/bin/yum -y update >> /root/dimemachine.log
+		/usr/bin/yum -y groupinstall "Development Tools" --disableexcludes=all >> /root/dimemachine.log
+		/usr/bin/yum -y install avahi avahi-compat-libdns_sd avahi-tools cups psutils ghostscript db4 wget >> /root/dimemachine.log
+		/usr/bin/yum -y install {avahi,openssl,openldap,pam,db4,libgcrypti,cracklib,libacl,tcp_wrappers}-devel libtool libnss >> /root/dimemachine.log
+		cd /root
+		/usr/bin/wget http://sourceforge.net/projects/netatalk/files/netatalk/3.0/netatalk-3.0.tar.gz/download >> /root/dimemachine.log
+		tar -zxvf netatalk* >> /root/dimemachine.log
+		cd netatalk*
+		./configure --with-init-style=redhat-sysv --with-acls --with-cracklib --with-pam --with-shadow --enable-cups --with-ldap >> /root/dimemachine.log
+		/usr/bin/make clean && /usr/bin/make && /usr/bin/make install >> /root/dimemachine.log
+		/sbin/chkconfig netatalk on >> /root/dimemachine.log
+		/sbin/chkconfig avahi-daemon on >> /root/dimemachine.log
+		#/bin/mkdir /backup
+		/bin/chown nobody:nobody /backup
+		/bin/chmod 777 /backup
+		/bin/rm -f /usr/local/etc/afp.conf
+		/bin/cp /etc/afp.tm /usr/local/etc/afp.conf >> /root/dimemachine.log
+		/bin/cp /etc/avahi.tm /etc/services/afpd.service >> /root/dimemachine.log
+		# End of Script
+		/sbin/chkconfig runonce off >> /root/dimemachine.log
+		echo "END OF INSTALL" >> /root/dimemachine.log
+		/sbin/reboot
+	;;
+	stop|status|restart|reload|force-reload)
+		# do onthing
+	;;
+esac
+EOF
+/bin/sleep 5
+/bin/chmod 777 /etc/init.d/runonce
+/sbin/chkconfig --add runonce
+/sbin/chkconfig runonce on
+%end
