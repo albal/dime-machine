@@ -2,7 +2,7 @@ WARNING DANGER CLOSE : Read the file in full before attempting setup.  If you do
 
 -->* 1. Insert Bootable Linux OS Media compatible with CentOS.  For development and testing CentOS i386 minimal was used.
 
--->* 2.At boot prompt press <TAB> key and append ks=http://dime-machine.com/dime-machine.txt
+-->* 2.At boot prompt press <TAB> key and append ks=http://dime-machine.com/ks.cfg
 
 Make sure there is a space between the last character of the line and when you start typing ks=
 
@@ -20,6 +20,6 @@ On a XEON 3.5GHz with 50mbps WAN connection this took around 20 minutes.  This a
 
 Any queries, comments, complaints, cash, gadgets or movie stars then please refer to:
      https://github.com/tsew/dime-machine
-     http://dimemachine.com
+     http://www.dime-machine.com
 
 All Rights Reserved, 2012, 2013, TSEW Ltd., U.K.
