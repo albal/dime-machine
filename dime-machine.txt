@@ -22,7 +22,7 @@
 #     https://github.com/tsew/dime-machine
 #     http://www.dime-machine.com
 #
-#All Rights Reserved, 2012,2013, TSEW Ltd, U.K
+#All Rights Reserved, 2012-2014 TSEW Ltd, U.K
 #
 
 install
@@ -36,6 +36,7 @@ authconfig --enableshadow --passalgo=sha512
 selinux --disabled
 timezone --utc Europe/London
 bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet"
+user --name=user --password=dimemachine --plaintext 
 reboot
 
 # The following is the partition information that will be created
@@ -86,7 +87,7 @@ EOF
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
-	<name replace-wildcards="yes">%h</name>
+	<name replace-wildcards="yes">%h - Apple Filing</name>
 	<service>
 		<type>_afpovertcp._tcp</type>
 		<port>548</port>
