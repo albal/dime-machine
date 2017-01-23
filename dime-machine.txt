@@ -61,6 +61,7 @@ logvol swap --name=lv_swap --vgname=VolGroup --grow --size=1024 --maxsize=1024
 
 %packages --nobase
 @core
+%end
 
 %post
 /bin/sed -i 's/rhgb quiet//g' /boot/grub/grub.conf
