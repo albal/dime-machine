@@ -48,7 +48,7 @@ reboot
 #
 # YOU WILL NEED A 16GB DISK AT LEAST
 #
-zerombr yes
+zerombr
 clearpart --all --drives=sda --initlabel
 part /boot --fstype=ext4 --size=500
 part pv.008002 --grow --size=1
