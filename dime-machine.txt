@@ -119,9 +119,9 @@ case "\$1" in
 		/usr/bin/yum -y update >> /root/dimemachine.log
 		/usr/bin/yum -y groupinstall "Development Tools" --disableexcludes=all >> /root/dimemachine.log
 		/usr/bin/yum -y install avahi avahi-compat-libdns_sd avahi-tools cups psutils ghostscript db4 wget >> /root/dimemachine.log
-		/usr/bin/yum -y install {avahi,openssl,openldap,pam,db4,libgcrypti,cracklib,libacl,tcp_wrappers}-devel libtool libnss >> /root/dimemachine.log
+		/usr/bin/yum -y install {avahi,openssl,openldap,pam,db4,libdb,libgcrypti,cracklib,libacl,tcp_wrappers}-devel libtool libnss >> /root/dimemachine.log
 		cd /root
-		/usr/bin/wget http://sourceforge.net/projects/netatalk/files/netatalk/3.0/netatalk-3.0.tar.gz/download >> /root/dimemachine.log
+		/usr/bin/wget http://sourceforge.net/projects/netatalk/files/netatalk/3.0/netatalk-3.0.tar.gz/download -O netatalk.tar.gz >> /root/dimemachine.log
 		tar -zxvf netatalk* >> /root/dimemachine.log
 		cd netatalk*
 		./configure --with-init-style=redhat-sysv --with-acls --with-cracklib --with-pam --with-shadow --enable-cups --with-ldap >> /root/dimemachine.log
