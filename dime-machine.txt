@@ -26,7 +26,6 @@
 #
 
 install
-cdrom
 lang en_US.UTF-8
 keyboard uk
 network --device eth0 --bootproto dhcp --hostname DimeMachine
